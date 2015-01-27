@@ -1,24 +1,27 @@
 package com.tc.ajk.englishquiz;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.tc.ajk.englishquiz.model.Category;
+
+import java.util.List;
 
 public class ChooseQuizActivity extends Activity implements View.OnClickListener, ListView.OnItemSelectedListener {
 
     private ListView listQuiz;
     private TextView txtChooseQuiz;
-    private ArrayList<String> alListItem;
     private AdapterView.OnItemSelectedListener itemSelectedListener;
+    private List<Category> alCategory;
+    private DatabaseManager dbHelper;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,19 +30,27 @@ public class ChooseQuizActivity extends Activity implements View.OnClickListener
         setContentView(R.layout.activity_choosequiz);
         this.listQuiz = (ListView) this.findViewById(R.id.listQuiz);
         this.txtChooseQuiz = (TextView) this.findViewById(R.id.txtChooseQuiz);
-        this.alListItem = new ArrayList<String>();
-        this.alListItem.add("Quiz 1");
-        this.alListItem.add("Quiz 2");
-        this.alListItem.add("Quiz 3");
+        this.dbHelper = new DatabaseManager(this);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, this.alListItem);
+        this.dbHelper.createDatabase();
+        this.dbHelper.openDatabase();
+
+        this.alCategory = this.dbHelper.getCategories();
+
+        CategoryAdapter adapter = new CategoryAdapter(this, R.layout.list_item, this.alCategory);
         this.listQuiz.setAdapter(adapter);
+        this.context = this;
 
         adapter.notifyDataSetChanged();
         this.listQuiz.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                txtChooseQuiz.setText((CharSequence) adapterView.getItemAtPosition(position));
+                //txtChooseQuiz.setText((CharSequence) adapterView.getItemAtPosition(position).toString());
+                Intent intent = new Intent(context, ExecuteQuizActivity.class);
+                Category selectedCategory = (Category) adapterView.getItemAtPosition(position);
+
+                intent.putExtra(Category.KEY, selectedCategory);
+                startActivity(intent);
             }
         });
     }

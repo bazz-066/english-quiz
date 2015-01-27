@@ -2,6 +2,9 @@ package com.tc.ajk.englishquiz;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -15,9 +18,11 @@ import java.util.List;
  */
 public class ExecuteQuizActivity extends Activity {
     private DatabaseManager dbHelper;
-    private TextView txtQuestion;
+    private TextView txtQuestion, txtMessage, txtScore;
     private RadioButton[] rbAnswer;
+    private Button btnNext, btnPrev;
     private Category category;
+    private int index, numOfQuestions, score;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,10 +30,14 @@ public class ExecuteQuizActivity extends Activity {
 
         this.rbAnswer = new RadioButton[4];
         this.txtQuestion = (TextView) this.findViewById(R.id.txtQuestion);
+        this.txtMessage = (TextView) this.findViewById(R.id.txtMessage);
+        this.txtScore = (TextView) this.findViewById(R.id.txtScore);
         this.rbAnswer[0] = (RadioButton) this.findViewById(R.id.rbAnswer1);
         this.rbAnswer[1] = (RadioButton) this.findViewById(R.id.rbAnswer2);
         this.rbAnswer[2] = (RadioButton) this.findViewById(R.id.rbAnswer3);
         this.rbAnswer[3] = (RadioButton) this.findViewById(R.id.rbAnswer4);
+        this.btnNext = (Button) this.findViewById(R.id.btnNext);
+        this.btnPrev = (Button) this.findViewById(R.id.btnPrev);
 
         this.dbHelper = new DatabaseManager(this);
         this.dbHelper.openDatabase();
@@ -41,11 +50,100 @@ public class ExecuteQuizActivity extends Activity {
             this.dbHelper.fillAnswers(q);
         }
 
-        Question q = questions.get(0);
-        this.txtQuestion.setText(q.getQuestionText());
-        this.rbAnswer[0].setText(q.getAnswers().get(0).getAnswerText());
-        this.rbAnswer[1].setText(q.getAnswers().get(1).getAnswerText());
-        this.rbAnswer[2].setText(q.getAnswers().get(2).getAnswerText());
-        this.rbAnswer[3].setText(q.getAnswers().get(3).getAnswerText());
+        this.numOfQuestions = questions.size();
+        this.index = 0;
+        this.score = 0;
+        this.showQuestion();
+        this.btnPrev.setEnabled(false);
+        this.category.resetQuestions();
+
+        this.btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                index++;
+                btnNext.setEnabled(true);
+                btnPrev.setEnabled(true);
+                if(index >= numOfQuestions)
+                    index--;
+                if(index+1 == numOfQuestions)
+                    btnNext.setEnabled(false);
+                showQuestion();
+            }
+        });
+
+        this.btnPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                index--;
+                btnPrev.setEnabled(true);
+                btnNext.setEnabled(true);
+                if(index < 0)
+                    index++;
+                if(index == 0)
+                    btnPrev.setEnabled(false);
+                showQuestion();
+            }
+        });
+
+        CompoundButton.OnCheckedChangeListener rbListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Question q = category.getQuestions().get(index);
+                if(b) {
+                    if(q.getAnswers().get(compoundButton.getId()).isTrue() == 1) {
+                        q.setAnswerMessage("You're right !!!");
+                        txtMessage.setText("You're right !!!");
+                        if(!q.isAnswered())
+                            score++;
+                    }
+                    else {
+                        q.setAnswerMessage("Wrong");
+                        txtMessage.setText("Wrong");
+                    }
+
+                    q.setSelectedAnswer(compoundButton.getId());
+                    q.setAnswered(true);
+                    txtScore.setText("Score : " + score + "/" + category.getQuestions().size());
+                }
+            }
+        };
+
+        this.rbAnswer[0].setOnCheckedChangeListener(rbListener);
+        this.rbAnswer[1].setOnCheckedChangeListener(rbListener);
+        this.rbAnswer[2].setOnCheckedChangeListener(rbListener);
+        this.rbAnswer[3].setOnCheckedChangeListener(rbListener);
     }
+
+    public void resetButton() {
+        for(RadioButton rb : this.rbAnswer) {
+            rb.setChecked(false);
+        }
+        this.txtMessage.setText("");
+    }
+
+    public void showQuestion() {
+        Question q = this.category.getQuestions().get(index);
+        this.txtQuestion.setText(q.getQuestionText());
+        this.rbAnswer[0].setId(q.getAnswerIndex()[0]);
+        this.rbAnswer[1].setId(q.getAnswerIndex()[1]);
+        this.rbAnswer[2].setId(q.getAnswerIndex()[2]);
+        this.rbAnswer[3].setId(q.getAnswerIndex()[3]);
+        this.rbAnswer[0].setText(q.getAnswers().get(q.getAnswerIndex()[0]).getAnswerText());
+        this.rbAnswer[1].setText(q.getAnswers().get(q.getAnswerIndex()[1]).getAnswerText());
+        this.rbAnswer[2].setText(q.getAnswers().get(q.getAnswerIndex()[2]).getAnswerText());
+        this.rbAnswer[3].setText(q.getAnswers().get(q.getAnswerIndex()[3]).getAnswerText());
+        this.resetButton();
+        if(q.isShowed()) {
+            for(int i=0; i<this.rbAnswer.length; i++) {
+                if(this.rbAnswer[i].getId() == q.getSelectedAnswer()) {
+                    this.rbAnswer[i].setChecked(true);
+                    this.txtMessage.setText(q.getAnswerMessage());
+                }
+            }
+        }
+        q.setShowed(true);
+    }
+
+
+
 }

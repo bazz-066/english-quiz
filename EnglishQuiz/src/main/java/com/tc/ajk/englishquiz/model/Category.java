@@ -50,5 +50,9 @@ public class Category implements Serializable {
         this.questions = questions;
     }
 
-
+    public void resetQuestions() {
+        for(Question q : this.questions) {
+            q.setAnswered(false);
+        }
+    }
 }

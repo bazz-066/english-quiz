@@ -93,6 +93,10 @@ public class ExecuteQuizActivity extends Activity {
                     if(q.getAnswers().get(compoundButton.getId()).isTrue() == 1) {
                         q.setAnswerMessage("You're right !!!");
                         txtMessage.setText("You're right !!!");
+                        String question = (String) txtQuestion.getText();
+                        question = question.replaceFirst("___", q.getAnswers().get(compoundButton.getId()).getAnswerText());
+                        txtQuestion.setText(question);
+
                         if(!q.isAnswered())
                             score++;
                     }

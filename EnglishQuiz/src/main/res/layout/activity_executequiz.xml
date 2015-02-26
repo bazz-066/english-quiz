@@ -7,64 +7,76 @@
 
     <TextView
             android:layout_width="fill_parent"
-            android:layout_height="106dp"
+            android:layout_height="186dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:id="@+id/txtQuestion"
-            android:layout_gravity="left|center_vertical"/>
+            android:layout_gravity="left|center_vertical"
+            android:textSize="40sp"/>
 
     <RadioGroup
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical">
+            android:layout_gravity="left|center_vertical"
+            android:paddingTop="5dp"
+            android:paddingBottom="30dp">
 
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/rbAnswer1"
                 android:layout_gravity="left|center_vertical"
-                android:checked="false"/>
+                android:checked="false"
+                android:layout_marginLeft="30dp"
+                android:textSize="30sp"/>
 
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/rbAnswer2"
                 android:layout_gravity="left|center_vertical"
-                android:checked="false"/>
+                android:checked="false"
+                android:layout_marginLeft="30dp"
+                android:textSize="30sp"/>
 
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/rbAnswer3"
                 android:layout_gravity="left|center_vertical"
-                android:checked="false"/>
+                android:checked="false"
+                android:layout_marginLeft="30dp"
+                android:textSize="30sp"/>
 
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/rbAnswer4"
                 android:layout_gravity="left|center_vertical"
-                android:checked="false"/>
+                android:checked="false"
+                android:layout_marginLeft="30dp"
+                android:textSize="30sp"/>
     </RadioGroup>
 
     <LinearLayout
+            android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:textAlignment="center">
+            android:layout_height="96dp">
 
         <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Prev"
-                android:id="@+id/btnPrev"
-                android:layout_gravity="center_horizontal|top"/>
-
-        <Button
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
                 android:text="Next"
                 android:id="@+id/btnNext"
                 />
+
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="26dp"
+                android:text="Finish"
+                android:id="@+id/btnFinish"
+                android:layout_weight="0.93"
+                android:enabled="true"
+                android:layout_gravity="left|center_vertical"/>
     </LinearLayout>
 
     <TextView
@@ -72,7 +84,8 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/txtMessage"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:paddingTop="10dp"/>
 
     <TextView
             android:layout_width="wrap_content"

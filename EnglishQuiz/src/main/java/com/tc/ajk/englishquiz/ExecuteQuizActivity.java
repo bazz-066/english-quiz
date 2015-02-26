@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.tc.ajk.englishquiz.model.Category;
 import com.tc.ajk.englishquiz.model.Question;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,9 +21,10 @@ public class ExecuteQuizActivity extends Activity {
     private DatabaseManager dbHelper;
     private TextView txtQuestion, txtMessage, txtScore;
     private RadioButton[] rbAnswer;
-    private Button btnNext, btnPrev;
+    private Button btnNext, btnFinish;
     private Category category;
     private int index, numOfQuestions, score;
+    private String username;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,15 +39,19 @@ public class ExecuteQuizActivity extends Activity {
         this.rbAnswer[2] = (RadioButton) this.findViewById(R.id.rbAnswer3);
         this.rbAnswer[3] = (RadioButton) this.findViewById(R.id.rbAnswer4);
         this.btnNext = (Button) this.findViewById(R.id.btnNext);
-        this.btnPrev = (Button) this.findViewById(R.id.btnPrev);
+        this.btnFinish = (Button) this.findViewById(R.id.btnFinish);
 
         this.dbHelper = new DatabaseManager(this);
         this.dbHelper.openDatabase();
 
         this.category = (Category) this.getIntent().getSerializableExtra(Category.KEY);
+        this.username = this.getIntent().getStringExtra(LoginActivity.KEYUSERNAME);
         this.dbHelper.fillQuestions(this.category);
 
+        long seed = System.nanoTime();
         List<Question> questions = this.category.getQuestions();
+        Collections.shuffle(questions);
+
         for(Question q: questions) {
             this.dbHelper.fillAnswers(q);
         }
@@ -54,7 +60,7 @@ public class ExecuteQuizActivity extends Activity {
         this.index = 0;
         this.score = 0;
         this.showQuestion();
-        this.btnPrev.setEnabled(false);
+        this.btnFinish.setEnabled(false);
         this.category.resetQuestions();
 
         this.btnNext.setOnClickListener(new View.OnClickListener() {
@@ -62,26 +68,27 @@ public class ExecuteQuizActivity extends Activity {
             public void onClick(View view) {
                 index++;
                 btnNext.setEnabled(true);
-                btnPrev.setEnabled(true);
-                if(index >= numOfQuestions)
+
+                if (index >= numOfQuestions)
                     index--;
-                if(index+1 == numOfQuestions)
+                if (index + 1 == numOfQuestions)
+                {
                     btnNext.setEnabled(false);
+                    btnFinish.setEnabled(true);
+                }
+                btnFinish.setEnabled(true);
                 showQuestion();
             }
         });
 
-        this.btnPrev.setOnClickListener(new View.OnClickListener() {
+        this.btnFinish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                index--;
-                btnPrev.setEnabled(true);
-                btnNext.setEnabled(true);
-                if(index < 0)
-                    index++;
-                if(index == 0)
-                    btnPrev.setEnabled(false);
-                showQuestion();
+                DatabaseManager dbHelper = new DatabaseManager(ExecuteQuizActivity.this);
+                dbHelper.openDatabase();
+                dbHelper.saveScore(ExecuteQuizActivity.this.score, ExecuteQuizActivity.this.username);
+                dbHelper.close();
+                ExecuteQuizActivity.this.finish();
             }
         });
 
@@ -137,14 +144,6 @@ public class ExecuteQuizActivity extends Activity {
         this.rbAnswer[2].setText(q.getAnswers().get(q.getAnswerIndex()[2]).getAnswerText());
         this.rbAnswer[3].setText(q.getAnswers().get(q.getAnswerIndex()[3]).getAnswerText());
         this.resetButton();
-        if(q.isShowed()) {
-            for(int i=0; i<this.rbAnswer.length; i++) {
-                if(this.rbAnswer[i].getId() == q.getSelectedAnswer()) {
-                    this.rbAnswer[i].setChecked(true);
-                    this.txtMessage.setText(q.getAnswerMessage());
-                }
-            }
-        }
         q.setShowed(true);
     }
 

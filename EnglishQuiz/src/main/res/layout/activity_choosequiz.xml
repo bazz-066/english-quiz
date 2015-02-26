@@ -22,7 +22,8 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Choose Your Preferred Quiz"
                 android:id="@+id/txtChooseQuiz"
-                android:layout_gravity="left|center_vertical"/>
+                android:layout_gravity="left|center_vertical"
+                android:textSize="40sp"/>
 
         <ListView
                 android:layout_width="wrap_content"

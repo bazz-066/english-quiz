@@ -1,5 +1,6 @@
 package com.tc.ajk.englishquiz;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,7 +15,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -78,7 +81,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     public void openDatabase() {
         String path = DatabaseManager.DB_PATH + DatabaseManager.DB_NAME;
-        this.myDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READONLY);
+        this.myDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE);
     }
 
     public synchronized void close() {
@@ -144,5 +147,18 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         resultSet.close();
         question.setAnswers(answers);
+    }
+
+    public void saveScore(int value, String username) {
+        ContentValues cv = new ContentValues();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+
+        cv.put("test_date", sdf.format(date));
+        cv.put("value", value);
+        cv.put("username", username);
+        this.myDB.insert("score", null, cv);
+
+        return;
     }
 }

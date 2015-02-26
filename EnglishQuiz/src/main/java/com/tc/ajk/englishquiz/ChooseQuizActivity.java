@@ -22,6 +22,7 @@ public class ChooseQuizActivity extends Activity implements View.OnClickListener
     private List<Category> alCategory;
     private DatabaseManager dbHelper;
     private Context context;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,9 @@ public class ChooseQuizActivity extends Activity implements View.OnClickListener
         this.context = this;
 
         adapter.notifyDataSetChanged();
+
+        this.username = this.getIntent().getStringExtra(LoginActivity.KEYUSERNAME);
+
         this.listQuiz.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -50,6 +54,7 @@ public class ChooseQuizActivity extends Activity implements View.OnClickListener
                 Category selectedCategory = (Category) adapterView.getItemAtPosition(position);
 
                 intent.putExtra(Category.KEY, selectedCategory);
+                intent.putExtra(LoginActivity.KEYUSERNAME, ChooseQuizActivity.this.username);
                 startActivity(intent);
             }
         });
@@ -61,6 +66,11 @@ public class ChooseQuizActivity extends Activity implements View.OnClickListener
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.choose_quiz, menu);
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        this.moveTaskToBack(true);
     }
 
     public void onClick(View v)

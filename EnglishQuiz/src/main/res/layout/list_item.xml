@@ -20,5 +20,6 @@
             android:text="Category"
             android:id="@+id/txtNameCategory"
             android:layout_below="@id/txtIdCategory"
-            android:layout_alignParentLeft="true"/>
+            android:layout_alignParentLeft="true"
+            android:textSize="35sp"/>
 </RelativeLayout>

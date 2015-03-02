@@ -6,11 +6,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.tc.ajk.englishquiz.model.Category;
 import com.tc.ajk.englishquiz.model.Question;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +33,7 @@ public class ExecuteQuizActivity extends Activity {
     private Category category;
     private int index, numOfQuestions, score;
     private String username;
+    private RadioGroup rgAnswer;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +47,7 @@ public class ExecuteQuizActivity extends Activity {
         this.rbAnswer[1] = (RadioButton) this.findViewById(R.id.rbAnswer2);
         this.rbAnswer[2] = (RadioButton) this.findViewById(R.id.rbAnswer3);
         this.rbAnswer[3] = (RadioButton) this.findViewById(R.id.rbAnswer4);
+        this.rgAnswer = (RadioGroup) this.findViewById(R.id.rgAnswer);
         this.btnNext = (Button) this.findViewById(R.id.btnNext);
         this.btnFinish = (Button) this.findViewById(R.id.btnFinish);
 
@@ -76,7 +86,7 @@ public class ExecuteQuizActivity extends Activity {
                     btnNext.setEnabled(false);
                     btnFinish.setEnabled(true);
                 }
-                btnFinish.setEnabled(true);
+                //btnFinish.setEnabled(true);
                 showQuestion();
             }
         });
@@ -88,34 +98,37 @@ public class ExecuteQuizActivity extends Activity {
                 dbHelper.openDatabase();
                 dbHelper.saveScore(ExecuteQuizActivity.this.score, ExecuteQuizActivity.this.username);
                 dbHelper.close();
-                ExecuteQuizActivity.this.finish();
+
+                //ExecuteQuizActivity.this.finish();
             }
         });
 
         CompoundButton.OnCheckedChangeListener rbListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Question q = category.getQuestions().get(index);
-                if(b) {
-                    if(q.getAnswers().get(compoundButton.getId()).isTrue() == 1) {
-                        q.setAnswerMessage("You're right !!!");
-                        txtMessage.setText("You're right !!!");
-                        String question = (String) txtQuestion.getText();
-                        question = question.replaceFirst("___", q.getAnswers().get(compoundButton.getId()).getAnswerText());
-                        txtQuestion.setText(question);
+            Question q = category.getQuestions().get(index);
+            if(compoundButton.isChecked()) {
+                if(q.getAnswers().get(compoundButton.getId()).isTrue() == 1) {
+                    q.setAnswerMessage("You're right !!!");
+                    txtMessage.setText("You're right !!!");
+                    String question = (String) txtQuestion.getText();
+                    question = question.replaceFirst("___", q.getAnswers().get(compoundButton.getId()).getAnswerText());
+                    txtQuestion.setText(question);
 
-                        if(!q.isAnswered())
-                            score++;
-                    }
-                    else {
-                        q.setAnswerMessage("Wrong");
-                        txtMessage.setText("Wrong");
-                    }
-
-                    q.setSelectedAnswer(compoundButton.getId());
-                    q.setAnswered(true);
-                    txtScore.setText("Score : " + score + "/" + category.getQuestions().size());
+                    if(!q.isAnswered())
+                        score++;
                 }
+                else {
+                    q.setAnswerMessage("Wrong");
+                    txtMessage.setText("Wrong");
+                }
+
+                compoundButton.setChecked(true);
+                compoundButton.setSelected(true);
+                q.setSelectedAnswer(compoundButton.getId());
+                q.setAnswered(true);
+                txtScore.setText("Score : " + score + "/" + category.getQuestions().size());
+            }
             }
         };
 
@@ -129,6 +142,7 @@ public class ExecuteQuizActivity extends Activity {
         for(RadioButton rb : this.rbAnswer) {
             rb.setChecked(false);
         }
+        this.rgAnswer.clearCheck();
         this.txtMessage.setText("");
     }
 

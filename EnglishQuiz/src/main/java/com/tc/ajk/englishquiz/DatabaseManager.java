@@ -1,16 +1,28 @@
 package com.tc.ajk.englishquiz;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.tc.ajk.englishquiz.model.Answer;
 import com.tc.ajk.englishquiz.model.Category;
 import com.tc.ajk.englishquiz.model.Question;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -158,6 +170,63 @@ public class DatabaseManager extends SQLiteOpenHelper {
         cv.put("value", value);
         cv.put("username", username);
         this.myDB.insert("score", null, cv);
+
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost("http://batik.if.its.ac.id/ielts/inscore.php");
+
+        try {
+            List<NameValuePair> postdata = new ArrayList<NameValuePair>();
+            postdata.add(new BasicNameValuePair("nrp", username));
+            postdata.add(new BasicNameValuePair("datetime", sdf.format(date)));
+            postdata.add(new BasicNameValuePair("score", Integer.toString(value)));
+
+            post.setEntity(new UrlEncodedFormEntity(postdata));
+            HttpResponse response = client.execute(post);
+            long respLength = response.getEntity().getContentLength();
+            BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
+
+            int count = 0;
+            StringBuffer strResp = new StringBuffer();
+            byte[] buffer = new byte[1024];
+
+            while(count < respLength) {
+                count += bis.read(buffer);
+                strResp.append(new String(buffer));
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+            builder.setCancelable(true);
+            builder.setTitle("Information");
+            builder.setMessage("Score uploaded : " + strResp.toString());
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ExecuteQuizActivity activity = (ExecuteQuizActivity) DatabaseManager.this.context;
+                    activity.finish();
+                }
+            });
+
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+        catch (IOException e) {
+            Log.d("ERROR", e.getMessage());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+            builder.setTitle("Error");
+            builder.setCancelable(true);
+            builder.setMessage(e.getMessage());
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ExecuteQuizActivity activity = (ExecuteQuizActivity) DatabaseManager.this.context;
+                    activity.finish();
+                }
+            });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
 
         return;
     }

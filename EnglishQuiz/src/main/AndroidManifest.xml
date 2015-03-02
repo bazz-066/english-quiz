@@ -25,5 +25,5 @@
         <activity android:name=".ChooseQuizActivity"/>
         <activity android:name=".ExecuteQuizActivity"/>
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

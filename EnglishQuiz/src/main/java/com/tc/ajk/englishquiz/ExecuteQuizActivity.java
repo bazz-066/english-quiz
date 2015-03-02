@@ -148,7 +148,7 @@ public class ExecuteQuizActivity extends Activity {
 
     public void showQuestion() {
         Question q = this.category.getQuestions().get(index);
-        this.txtQuestion.setText(q.getQuestionText());
+        this.txtQuestion.setText((this.index + 1) + ". " + q.getQuestionText());
         this.rbAnswer[0].setId(q.getAnswerIndex()[0]);
         this.rbAnswer[1].setId(q.getAnswerIndex()[1]);
         this.rbAnswer[2].setId(q.getAnswerIndex()[2]);

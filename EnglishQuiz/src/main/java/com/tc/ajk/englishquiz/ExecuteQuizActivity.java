@@ -9,6 +9,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.tc.ajk.englishquiz.model.Answer;
 import com.tc.ajk.englishquiz.model.Category;
 import com.tc.ajk.englishquiz.model.Question;
 
@@ -20,6 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +36,7 @@ public class ExecuteQuizActivity extends Activity {
     private int index, numOfQuestions, score;
     private String username;
     private RadioGroup rgAnswer;
+    private Date startTime;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +63,7 @@ public class ExecuteQuizActivity extends Activity {
 
         long seed = System.nanoTime();
         List<Question> questions = this.category.getQuestions();
-        Collections.shuffle(questions);
+        //Collections.shuffle(questions);
 
         for(Question q: questions) {
             this.dbHelper.fillAnswers(q);
@@ -96,7 +99,7 @@ public class ExecuteQuizActivity extends Activity {
             public void onClick(View view) {
                 DatabaseManager dbHelper = new DatabaseManager(ExecuteQuizActivity.this);
                 dbHelper.openDatabase();
-                dbHelper.saveScore(ExecuteQuizActivity.this.score, ExecuteQuizActivity.this.username);
+                dbHelper.saveScore(ExecuteQuizActivity.this.score, ExecuteQuizActivity.this.username, ExecuteQuizActivity.this.startTime);
                 dbHelper.close();
 
                 //ExecuteQuizActivity.this.finish();
@@ -120,7 +123,12 @@ public class ExecuteQuizActivity extends Activity {
                 }
                 else {
                     q.setAnswerMessage("Wrong");
-                    txtMessage.setText("Wrong");
+                    Answer rightAnswer = null;
+                    for(Answer answer:q.getAnswers())
+                        if (answer.isTrue() == 1) {
+                            rightAnswer = answer;
+                        }
+                    txtMessage.setText("Wrong, the right answer is " + rightAnswer.getAnswerText());
                 }
 
                 compoundButton.setChecked(true);
@@ -136,6 +144,8 @@ public class ExecuteQuizActivity extends Activity {
         this.rbAnswer[1].setOnCheckedChangeListener(rbListener);
         this.rbAnswer[2].setOnCheckedChangeListener(rbListener);
         this.rbAnswer[3].setOnCheckedChangeListener(rbListener);
+
+        this.startTime = new Date();
     }
 
     public void resetButton() {

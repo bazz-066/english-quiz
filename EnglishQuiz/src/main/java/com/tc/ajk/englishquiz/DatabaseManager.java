@@ -161,7 +161,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         question.setAnswers(answers);
     }
 
-    public void saveScore(int value, String username) {
+    public void saveScore(int value, String username, Date startTime) {
         ContentValues cv = new ContentValues();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
@@ -169,6 +169,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         cv.put("test_date", sdf.format(date));
         cv.put("value", value);
         cv.put("username", username);
+        cv.put("start_time", sdf.format(startTime));
         this.myDB.insert("score", null, cv);
 
         HttpClient client = new DefaultHttpClient();
@@ -179,6 +180,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
             postdata.add(new BasicNameValuePair("nrp", username));
             postdata.add(new BasicNameValuePair("datetime", sdf.format(date)));
             postdata.add(new BasicNameValuePair("score", Integer.toString(value)));
+            postdata.add(new BasicNameValuePair("starttime", sdf.format(startTime)));
 
             post.setEntity(new UrlEncodedFormEntity(postdata));
             HttpResponse response = client.execute(post);
